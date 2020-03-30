@@ -3,6 +3,7 @@
 	"displayName": "vToVariable demo",
 	"description": "vscode-plugin-demo",
 	"publisher": "mmh",
+	"repository": "https://github.com/Bossmmh/vscodePluginDemo.git",
 	"version": "0.0.2",
 	"engines": {
 		"vscode": "^1.35.0"
