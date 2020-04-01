@@ -1,27 +1,11 @@
 import * as vscode from 'vscode';
-const _ = require('lodash');
-const fs = require("fs");
-const path = require('path');
 import { RProcess } from "./process";
-import {walk, dealScri, handleFr} from './utils';
 
 export class RProvider implements vscode.CompletionItemProvider {
 
     constructor(private process: RProcess) { }
 
     provideCompletionItems (document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): vscode.CompletionItem[]  {
-        
-        const dir = vscode.workspace.rootPath || '';
-
-        vscode.workspace.onDidSaveTextDocument(((e) => {
-            const {fileName = ''} = e;
-            const isStyleFile = fileName.slice(-4);
-
-            if(isStyleFile === 'less' || isStyleFile === 'scss' || isStyleFile === 'sass') {
-                this.process.variableList = handleFr(dealScri(walk(dir)));
-            }
-        }));
-
         // return new Promise((resolve, reject) => {
 			
             let wordAtPosition = document.getWordRangeAtPosition(position);
@@ -49,12 +33,9 @@ export class RProvider implements vscode.CompletionItemProvider {
             // const { preColor = {}, prePx = {}, variablePx = [], variableColor = [] } = res;
             const { preValue = {}, variableList = [] } = res;
             const completionItemList = variableList.map((dep:any) => {
-                // vscode.CompletionItemKind 表示提示的类型
-                // const item = new vscode.CompletionItem(`${preValue}-> ${dep.key}`, vscode.CompletionItemKind.Variable);
                 const item = new vscode.CompletionItem(`${dep.key}:${dep.value}`, vscode.CompletionItemKind.Variable);
                 document.getWordRangeAtPosition(position);
                 item.insertText = dep.key;
-                // item.label = `${dep.key}:${dep.value}`;
                 item.sortText = dep.sortIndex;
                 return item;
             });

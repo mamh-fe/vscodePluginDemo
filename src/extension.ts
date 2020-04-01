@@ -5,7 +5,7 @@ import * as vscode from 'vscode';
 import { RProcess } from './process';
 import { RProvider } from './provider';
 
-import {walk, dealScri, handleFr} from './utils';
+import {walk, dealScri, handleFr, saveContent} from './utils';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -17,12 +17,31 @@ export function activate(context: vscode.ExtensionContext) {
 
 	const dir = vscode.workspace.rootPath || '';
 	const variableList = handleFr(dealScri(walk(dir)));
-	// console.log('=====handleFr(dealScri(walk(dir)))', handleFr(dealScri(walk(dir))));
-	console.log('=======variableList', variableList);
+	saveContent(variableList);
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
+	const process = new RProcess();
+	let provider = new RProvider(process);
+	const LANS = ['less', 'scss', 'sass'];
+	for (let lan of LANS) {
+		let providerDisposable = vscode.languages.registerCompletionItemProvider(lan, provider, ' ');
+		context.subscriptions.push(providerDisposable);
+	}
+
+	// 	监听
+	const didSaveDisposable = vscode.workspace.onDidSaveTextDocument(((e) => {
+		const dir = vscode.workspace.rootPath || '';
+		const {fileName = ''} = e;
+		const isStyleFile = fileName.slice(-4);
+
+		if(isStyleFile === 'less' || isStyleFile === 'scss' || isStyleFile === 'sass') {
+			const variableList = handleFr(dealScri(walk(dir)));
+			saveContent(variableList);
+		}
+	}));
+
+	context.subscriptions.push(didSaveDisposable);
+
+	// Hello World
 	let disposable = vscode.commands.registerCommand('extension.helloWorld', () => {
 		// The code you place here will be executed every time your command is executed
 
@@ -31,15 +50,6 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	context.subscriptions.push(disposable);
-
-
-	const process = new RProcess(variableList);
-	let provider = new RProvider(process);
-	const LANS = ['less', 'scss', 'sass'];
-	for (let lan of LANS) {
-		let providerDisposable = vscode.languages.registerCompletionItemProvider(lan, provider, ' ');
-		context.subscriptions.push(providerDisposable);
-	}
 
 }
 

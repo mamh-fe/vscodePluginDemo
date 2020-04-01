@@ -1,11 +1,5 @@
-const path = require('path');
-const fs = require("fs");
 const _ = require('lodash');
-import * as vscode from 'vscode';
-import { getVSCodeDownloadUrl } from 'vscode-test/out/util';
-import { listenerCount } from 'cluster';
-import {dealScri, handleFr, handleMixParams, handleMixColor} from './utils';
-// import { object } from 'prop-types';
+import { handleMixParams, handleMixColor, getContent} from './utils';
 
 interface objItem {
     key: string, 
@@ -20,10 +14,13 @@ interface statsObj {
 
 export class RProcess {
 
-    constructor(public variableList: Array<any>) {}
+    // constructor(public variableList: Array<any>) {}
+    constructor() {}
 
     private reColorReg: RegExp =/^#([0-9a-fA-F]+)$/g;
     private pxReg: RegExp = /(^\d+(\.\d+)?)(px)?/;
+    /**如果开始取了不能更新到最新的值， 所以要使用的时候去取 */
+    // private variableList: Array<any> = getContent();
 
     /**
      * transform color/ px to variable
@@ -35,12 +32,8 @@ export class RProcess {
         let matchColor = this.reColorReg.test(text);
         let matchPx = this.pxReg.test(text);
         if(!matchColor && !matchPx ) return null;
-
-        // const fr = dealScri(this.fileList);
-        // const variableArr = handleFr(this.fContents);
-        console.log('=====this.variableList', this.variableList);
         if(matchPx) {
-            return this.toPxVariable(text, this.variableList);
+            return this.toPxVariable(text, getContent());
         }
  
         // if(matchColor) {
@@ -121,7 +114,7 @@ export class RProcess {
     }
 
     // px 转变量
-    private toPxVariable(pxString: string, variableArr: any[]) {
+    private toPxVariable(pxString: string, variableArr: any[] = []) {
         let pxS = pxString.replace('px', '');
         let pxArr:object[] = [];
         // _.each(variableArr, (v: objItem) => {v.key = v.key && v.key.trim(); v.value = v.value && v.value.trim()});

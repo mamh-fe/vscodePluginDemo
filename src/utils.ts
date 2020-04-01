@@ -3,9 +3,21 @@ const fs = require("fs");
 const _ = require('lodash');
 import * as vscode from 'vscode';
 
-interface colorItem {
+interface objItem {
     key: string, 
-    value: string
+    value: string,
+    difference ?: number
+}
+
+let vContentList : Array<objItem>;
+
+/**存储所有less, saas, scss 文件中以'@'开头的内容, 数组格式 */
+export function saveContent(list: Array<any>) {
+    vContentList = list;
+}
+
+export function getContent() {
+    return vContentList;
 }
 
 /* 读取文件内容*/
@@ -62,7 +74,7 @@ export function handleFr(fr: any) {
         if(item && item.startsWith('@') && !item.includes('import')) {
             // 将诸如这样的字符串转成对象 "@green: #123123"
             const arr = item.split(':');
-            const obj: colorItem = {
+            const obj: objItem = {
                 key: arr[0].replace(" ", ""),
                 value: arr[1].replace(" ", "")
             }
@@ -151,7 +163,7 @@ export function handleMixParams(val: string) {
 export function handleMixColor(mixParams: string[], variableArr: any[]) {
     const getColor = (colorV: string) => {
         let c: string = '';
-        variableArr.forEach((item: colorItem) => {
+        variableArr.forEach((item: objItem) => {
             if(item.key === colorV) c = item.value;
         })
         return c.replace(/(^\s*)|(\s*$)/g, "");
