@@ -1,7 +1,5 @@
 const path = require('path');
 const fs = require("fs");
-const _ = require('lodash');
-import * as vscode from 'vscode';
 
 interface objItem {
     key: string, 
@@ -10,6 +8,8 @@ interface objItem {
 }
 
 let vContentList : Array<objItem>;
+const nameList = ['.less', '.scss', '.sass'];
+const excludeFiles = ['static','node_modules','build','public'];
 
 /**存储所有less, saas, scss 文件中以'@'开头的内容, 数组格式 */
 export function saveContent(list: Array<any>) {
@@ -19,6 +19,9 @@ export function saveContent(list: Array<any>) {
 export function getContent() {
     return vContentList;
 }
+
+/**需要监听的文件后缀名 */
+export const extnameList = nameList;
 
 /* 读取文件内容*/
 export function dealScri(fileList:Array<string>) {
@@ -35,7 +38,7 @@ export function walk(dir: String) {
     var list = fs.readdirSync(dir);
     list.forEach((file: string) => {
         // 排除static静态目录  node_modules build
-        if (file === 'static' || file === 'node_modules' || file === 'build' || file === 'public') {
+        if (excludeFiles.includes(file)) {
             return false
         }
         file = dir + '/' + file
@@ -44,7 +47,8 @@ export function walk(dir: String) {
             results = results.concat(walk(file))
         } else {
             // 过滤后缀名
-            if (path.extname(file) === '.less' || path.extname(file) === '.scss' || path.extname(file) === '.sass') {
+            const extname = path.extname(file);
+            if (nameList.includes(extname)) {
                 results.push(path.resolve(__dirname, file))
             }
         }
