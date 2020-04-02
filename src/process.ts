@@ -126,6 +126,16 @@ export class RProcess {
                 item.difference = Math.abs(parseFloat(val) - parseFloat(pxS));
                 pxArr.push(item);
             }
+            // 引用变量的情况
+            if(reV.startsWith('@')) {
+                // 查看变量是否是px值
+                const obj = _.find(variableArr, (o: any) => (o.key === reV.slice(0, reV.length - 1)));
+                if(obj) {
+                    let val = obj.value.replace('px;', '');
+                    item.difference = Math.abs(parseFloat(val) - parseFloat(pxS));
+                    pxArr.push(item);
+                }
+            }
         })
         const sortVariableArr = _.sortBy(pxArr, 'difference');
         // sortText 排序是根据string 类型进行的排序， 所以之前计算的difference 不起作用， 则从新整理用字符串排序，
