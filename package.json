@@ -4,7 +4,7 @@
 	"description": "vscode-plugin-demo",
 	"publisher": "mmh",
 	"repository": "https://github.com/Bossmmh/vscodePluginDemo.git",
-	"version": "0.0.3",
+	"version": "0.0.1",
 	"engines": {
 		"vscode": "^1.1.36"
 	},
