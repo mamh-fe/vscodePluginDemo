@@ -62,8 +62,8 @@ export async function dealScriOnLine(fileList:Array<string>) {
             if(regex.test(line) && !line.includes('import')) {
                 const singleLine = line.split(':');
                 const obj: objItem = {
-                    key: singleLine[0].replace(' ', ''),
-                    value: singleLine[1].replace(' ', '')
+                    key: singleLine[0].trim(),
+                    value: singleLine[1].trim()
                 }
                 arr.push(obj);
             }
