@@ -1,5 +1,6 @@
 const path = require('path');
 const fs = require("fs");
+var readline = require('readline');
 
 interface objItem {
     key: string, 
@@ -22,15 +23,6 @@ export function getContent() {
 
 /**需要监听的文件后缀名 */
 export const extnameList = nameList;
-
-/* 读取文件内容*/
-export function dealScri(fileList:Array<string>) {
-    let fcontent = '';
-    fileList.forEach((filepath, index) => {
-        fcontent += fs.readFileSync(filepath, 'utf-8');
-    });
-    return fcontent;
-}
 
 // 查找less, scss, sass 文件
 export function walk(dir: String) {
@@ -56,36 +48,46 @@ export function walk(dir: String) {
     return results
 }
 
+// 按行读取文件内容解析
+export async function dealScriOnLine(fileList:Array<string>) {
+    const arr = new Array();
+    fileList.forEach((filePath:string) => {
+        const fRead = fs.createReadStream(filePath);
+        const objReadline = readline.createInterface({
+            input:fRead
+        });
+        objReadline.on('line',function (line:any) {
+            const regex=/^@.*;$/;
+            line.trim();
+            if(regex.test(line) && !line.includes('import')) {
+                const singleLine = line.split(':');
+                const obj: objItem = {
+                    key: singleLine[0].replace(' ', ''),
+                    value: singleLine[1].replace(' ', '')
+                }
+                arr.push(obj);
+            }
+        });
+        objReadline.on('close',function () {
+            saveContent(arr);
+        });
+   });
+}
+
+/* 读取文件内容*/
+export function dealScri(fileList:Array<string>) {
+    let fcontent = '';
+    fileList.forEach((filepath, index) => {
+        fcontent += fs.readFileSync(filepath, 'utf-8');
+    });
+    return fcontent;
+}
+
 // 去掉换行去掉空格
 export function ClearBr(key:string): string {
     key = key.replace(/(\/\/.*)|(\/\*[\s\S]*?\*\/)/g, '');
     key = key.replace(/[\r\n]/g, ""); 
-    // key = key.replace(/<\/?.+?>/g,""); 
-    // key = key.replace(" ", "");
-
-    // 解析规则？每行去掉空格后， 以@开头
     return key;
-}
-
-export function handleFr(fr: any) {
-    // 去掉换行空格
-    let  clearFr = ClearBr(fr);
-    // 截取成数组（前提是每个后边都要以分号结尾, TODO 如果有类似@base-size: 12px 没有以分号结尾怎么办）
-    const clearArr = clearFr.split(';');
-    // 筛选声明变量的元素项
-    let variableArr: object[] = [];
-    clearArr.forEach((item : any) => {
-        if(item && item.startsWith('@') && !item.includes('import')) {
-            // 将诸如这样的字符串转成对象 "@green: #123123"
-            const arr = item.split(':');
-            const obj: objItem = {
-                key: arr[0].replace(" ", ""),
-                value: arr[1].replace(" ", "")
-            }
-            variableArr.push(obj);
-        }
-    })
-    return variableArr;
 }
 
 /**

@@ -117,22 +117,12 @@ export class RProcess {
     private toPxVariable(pxString: string, variableArr: any[] = []) {
         let pxS = pxString.replace('px', '');
         let pxArr:object[] = [];
-        // _.each(variableArr, (v: objItem) => {v.key = v.key && v.key.trim(); v.value = v.value && v.value.trim()});
-
-        // const pxArr:object[] = variableArr.reduce((ret, currentValue:objItem) => {
-        //     if (!currentValue.value || !currentValue.value.endsWith('px')) return ret;
-        //     let val = currentValue.value.replace('px', '');
-        //     currentValue.difference = Math.abs(parseFloat(val) - parseFloat(pxS));
-        //     return ret.push(currentValue);
-        // }, []);
         variableArr.forEach(item => {
             if(!item.value) return;
-            item.key = item.key.trim();
-            item.value = item.value.trim();
-            let reV = item.value.trim();
+            let reV = item.value;
             // 找出px的变量 TODO: 目前先找一层的px， 以后还需要扩展计算， 取值等情况
-            if(reV.endsWith('px')) {
-                let val = reV.replace('px', '');
+            if(reV.endsWith('px;')) {
+                let val = reV.replace('px;', '');
                 item.difference = Math.abs(parseFloat(val) - parseFloat(pxS));
                 pxArr.push(item);
             }
@@ -140,7 +130,6 @@ export class RProcess {
         const sortVariableArr = _.sortBy(pxArr, 'difference');
         // sortText 排序是根据string 类型进行的排序， 所以之前计算的difference 不起作用， 则从新整理用字符串排序，
         _.each(sortVariableArr, (v: any, index:number) => v.sortIndex = String(1) + Array(index+1).fill(1).join(''));
-
         return {preValue: `${pxString}`, variableList: sortVariableArr};
     }
 }

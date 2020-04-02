@@ -6,7 +6,7 @@ const path = require('path');
 import { RProcess } from './process';
 import { RProvider } from './provider';
 
-import {walk, dealScri, handleFr, saveContent, extnameList} from './utils';
+import {walk, dealScriOnLine, extnameList} from './utils';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -17,8 +17,7 @@ export function activate(context: vscode.ExtensionContext) {
 	console.log('Congratulations, your extension "vscode-plugin-demo" is now active!');
 
 	const dir = vscode.workspace.rootPath || '';
-	const variableList = handleFr(dealScri(walk(dir)));
-	saveContent(variableList);
+	dealScriOnLine(walk(dir));
 
 	const process = new RProcess();
 	let provider = new RProvider(process);
@@ -34,8 +33,7 @@ export function activate(context: vscode.ExtensionContext) {
 		const {fileName = ''} = e;
 		const extname = path.extname(fileName);
 		if(extnameList.includes(extname)) {
-			const variableList = handleFr(dealScri(walk(dir)));
-			saveContent(variableList);
+			dealScriOnLine(walk(dir));
 		}
 	}));
 
