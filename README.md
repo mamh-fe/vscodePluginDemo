@@ -12,7 +12,7 @@
 
 ### For more information
 
-* see change log https://github.com/Bossmmh/valueToVariable.git
+* see change log https://github.com/Bossmmh/vscodePluginDemo.git
 **Enjoy!**
 
 TODO:
