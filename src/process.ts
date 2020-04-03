@@ -34,13 +34,9 @@ export class RProcess {
         if(!matchColor && !matchPx ) return null;
         if(matchPx) {
             return this.toPxVariable(text, getContent());
+        }else {
+            return this.toColorVariable(text, getContent());
         }
- 
-        // if(matchColor) {
-        //     return this.toColorVariable(text, this.variableList);
-        // }else {
-        //     return this.toPxVariable(text, this.variableList);
-        // }
     }
 
      /**
@@ -93,11 +89,16 @@ export class RProcess {
             if(reV.startsWith('@')) {
                 let v = '';
                 newAriableArr.forEach((ele: any) => {
-                    if(reV === ele.key) {
+                    if(reV.slice(0, reV.length - 1).trim() === ele.key) {
                         v = ele.value;
                     }
                 })
-                const sItem = v.slice(1).replace(/(^\s*)|(\s*$)/g, "");
+                if(!v.startsWith('#')) {
+                    // 如果查找到变量值是px， 则将其移除数组
+                    newAriableArr = _.without(newAriableArr, item);
+                    return;
+                };
+                const sItem = v.slice(1, v.length-1);
                 // 如果value直接定义的是色值
                 const tensItem = parseInt(sItem, 16);
                 item.difference = Math.abs(tenColorStr-tensItem);
@@ -108,7 +109,7 @@ export class RProcess {
         const sortVariableArr = _.sortBy(newAriableArr, 'difference');
 
         // sortText 排序是根据string 类型进行的排序， 所以之前计算的difference 不起作用， 则从新整理用字符串排序，
-        _.each(newAriableArr, (v: any, index:number) => v.sortIndex = String(1) + Array(index+1).fill(1).join(''));
+        _.each(sortVariableArr, (v: any, index:number) => v.sortIndex = String(1) + Array(index+1).fill(1).join(''));
 
         return {preValue: `${colorStr}`, variableList: sortVariableArr};
     }
@@ -120,7 +121,6 @@ export class RProcess {
         variableArr.forEach(item => {
             if(!item.value) return;
             let reV = item.value;
-            // 找出px的变量 TODO: 目前先找一层的px， 以后还需要扩展计算， 取值等情况
             if(reV.endsWith('px;')) {
                 let val = reV.replace('px;', '');
                 item.difference = Math.abs(parseFloat(val) - parseFloat(pxS));
@@ -129,8 +129,8 @@ export class RProcess {
             // 引用变量的情况
             if(reV.startsWith('@')) {
                 // 查看变量是否是px值
-                const obj = _.find(variableArr, (o: any) => (o.key === reV.slice(0, reV.length - 1)));
-                if(obj) {
+                const obj = _.find(variableArr, (o: any) => (o.key === reV.slice(0, reV.length - 1).trim()));
+                if(obj && obj.value.endsWith('px;')) {
                     let val = obj.value.replace('px;', '');
                     item.difference = Math.abs(parseFloat(val) - parseFloat(pxS));
                     pxArr.push(item);
